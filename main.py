@@ -117,19 +117,6 @@ def main():
     )
 
     parser.add_argument(
-        "--date", help="Timestamp of data as YYYY_MM", type=str, required=True
-    )
-
-    parser.add_argument(
-        "--timestamp_filter",
-        nargs=2,
-        metavar=("StartDate", "EndDate"),
-        help="Filtering by timestamp.",
-        type=str,
-        default=(None, None),
-    )
-
-    parser.add_argument(
         "--resolution",
         help="Hierarchical geospatial index of your choice.",
         type=int,
@@ -144,14 +131,11 @@ def main():
     # Arguments
     args = parser.parse_args()
     FILE = args.file_name
-    StartDate, EndDate = args.timestamp_filter
     RESOLUTION = args.resolution
     OUTPATH = args.output_path
-    DATE = args.date
-
+    
     # Main code
-    KEY = f"{DATE.split('-')[0]}/{DATE.split('-')[1]}/data/{FILE}"
-    FILE_PATH = read_obj_from_s3(os.path.join(BUCKET, KEY))
+    FILE_PATH = read_obj_from_s3(os.path.join(BUCKET, FILE))
     convert_netCDF_to_parquet(FILE_PATH, OUTPATH, (StartDate, EndDate), RESOLUTION)
     logger.info("File was save in %s", OUTPATH)
 
