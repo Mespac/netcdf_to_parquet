@@ -40,7 +40,7 @@ SECRET_KEY = os.getenv("S3_SECRET_ACCESS_KEY")
 
 def read_obj_from_s3(s3path: str):
     # e.g. s3path = 'era5-pds/2022/05/data/precipitation_amount_1hour_Accumulation.nc'
-    fs_s3 = s3fs.S3FileSystem(key=ACCESS_KEY, secret=SECRET_KEY, endpoint_url="https://s3.010125.xyz/")
+    fs_s3 = s3fs.S3FileSystem(key=ACCESS_KEY, secret=SECRET_KEY)
     remote_file_obj = fs_s3.open(s3path, mode="rb")
     return remote_file_obj
 
