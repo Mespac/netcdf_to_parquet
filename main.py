@@ -34,13 +34,13 @@ coloredlogs.install(
     },
 )
 BUCKET = os.getenv("BUCKET") # "https://s3.010125.xyz/dist2coast-1deg-ocean/" #
-ACCESS_KEY = os.getenv("S3_ACCESS_KEY_ID")
-SECRET_KEY = os.getenv("S3_SECRET_ACCESS_KEY")
+ACCESS_KEY = os.getenv("FSSPEC_S3_KEY")
+SECRET_KEY = os.getenv("FSSPEC_S3_SECRET")
 
 
 def read_obj_from_s3(s3path: str):
     # e.g. s3path = 'era5-pds/2022/05/data/precipitation_amount_1hour_Accumulation.nc'
-    fs_s3 = s3fs.S3FileSystem() # fs_s3 = s3fs.S3FileSystem(key=ACCESS_KEY, secret=SECRET_KEY)
+    fs_s3 = s3fs.S3FileSystem(key=ACCESS_KEY, secret=SECRET_KEY, client_kwargs={'endpoint_url': "https://s3.010125.xyz"})
     remote_file_obj = fs_s3.open(s3path, mode="rb")
     return remote_file_obj
 
@@ -64,7 +64,6 @@ def _H3Index(coordinates: np.ndarray, resolution: int = 10) -> np.ndarray:
 def convert_netCDF_to_parquet(
     file_path,
     output_path: str,
-    timestamp_filter: Optional[tuple] = None,
     resolution: int = 10):
     """Convert the downloaded netCDF file to parquet"""
 
@@ -73,11 +72,6 @@ def convert_netCDF_to_parquet(
     ds = xr.open_dataset(file_path, engine="h5netcdf")
     variable_name = list(ds.keys())[1]
     list_coords = list(ds.coords)
-
-    if None not in timestamp_filter:
-        logger.info("Filtering datestampe between %s & %s", timestamp_filter[0],timestamp_filter[1])
-        filter = {list_coords[2]: slice(timestamp_filter[0], timestamp_filter[1])}
-        ds = ds.sel(filter)
 
     logger.info("Extract coordinates & value")
     longitudes = ds[list_coords[0]].values
@@ -136,7 +130,7 @@ def main():
     
     # Main code
     FILE_PATH = read_obj_from_s3(os.path.join(BUCKET, FILE))
-    convert_netCDF_to_parquet(FILE_PATH, OUTPATH, (StartDate, EndDate), RESOLUTION)
+    convert_netCDF_to_parquet(FILE_PATH, OUTPATH, RESOLUTION)
     logger.info("File was save in %s", OUTPATH)
 
 
