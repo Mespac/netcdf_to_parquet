@@ -69,7 +69,7 @@ def convert_netCDF_to_parquet(
 
     # Read file & extract corrosponding info
     logger.info("Reading climate file from %s", BUCKET)
-    ds = xr.open_dataset(file_path, engine="h5netcdf")
+    ds = xr.open_dataset(file_path, engine="netcdf4")
     variable_name = list(ds.keys())[1]
     list_coords = list(ds.coords)
 
